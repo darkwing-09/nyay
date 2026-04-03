@@ -1,168 +1,203 @@
 package com.nyayasetu.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.nyayasetu.ui.screens.DashboardScreen
-import com.nyayasetu.ui.screens.LoginScreen
-import com.nyayasetu.ui.screens.RegisterScreen
-import com.nyayasetu.ui.screens.SplashScreen
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ExitToApp
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.*
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.nyayasetu.ui.screens.*
+import kotlinx.coroutines.launch
 
 @androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
-    
-    NavHost(navController = navController, startDestination = "splash") {
-        composable("splash") {
-            SplashScreen(
-                onNavigateToLogin = {
-                    navController.navigate("login") {
-                        popUpTo("splash") { inclusive = true }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    val noDrawerRoutes = listOf("splash", "login", "register")
+    val showDrawer = currentRoute != null && currentRoute !in noDrawerRoutes
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = showDrawer,
+        drawerContent = {
+            if (showDrawer) {
+                ModalDrawerSheet {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Nyay Setu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
+                    Divider()
+                    
+                    val menuItems = listOf(
+                        "Home" to "dashboard",
+                        "File FIR" to "fir_form",
+                        "Upload FIR Document" to "fir_upload",
+                        "Record Voice FIR" to "fir_voice",
+                        "AI Case Analysis" to "analysis",
+                        "Batch Evidence Analysis" to "evidence_analysis",
+                        "Find Lawyers" to "lawyers",
+                        "Legal Feed" to "feed",
+                        "My Conversations" to "conversations"
+                    )
+
+                    menuItems.forEach { (title, route) ->
+                        NavigationDrawerItem(
+                            label = { Text(title) },
+                            selected = currentRoute == route,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate(route) {
+                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        )
                     }
-                },
-                onNavigateToDashboard = {
-                    navController.navigate("fir_form") {
-                        popUpTo("splash") { inclusive = true }
-                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+                    Divider()
+                    NavigationDrawerItem(
+                        label = { Text("Logout") },
+                        selected = false,
+                        icon = { Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = "Logout") },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            navController.navigate("login") {
+                                popUpTo(0)
+                            }
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
                 }
-            )
+            }
         }
-        composable("login") {
-            LoginScreen(
-                onNavigateToRegister = {
-                    navController.navigate("register")
-                },
-                onNavigateToDashboard = {
-                    navController.navigate("fir_form") {
-                        popUpTo("login") { inclusive = true }
-                    }
+    ) {
+        Scaffold(
+            topBar = {
+                if (showDrawer) {
+                    TopAppBar(
+                        title = { Text("Nyay Setu") },
+                        navigationIcon = {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Filled.Menu, contentDescription = "Menu")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.background,
+                        )
+                    )
                 }
-            )
-        }
-        composable("register") {
-            RegisterScreen(
-                onNavigateToLogin = {
-                    navController.navigateUp()
+            }
+        ) { innerPadding ->
+            val modifier = if (showDrawer) Modifier.padding(innerPadding) else Modifier
+            
+            NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+                composable("splash") {
+                    SplashScreen(
+                        onNavigateToLogin = {
+                            navController.navigate("login") { popUpTo("splash") { inclusive = true } }
+                        },
+                        onNavigateToDashboard = {
+                            navController.navigate("fir_form") { popUpTo("splash") { inclusive = true } }
+                        }
+                    )
                 }
-            )
-        }
-        composable("dashboard") {
-            val viewModel: com.nyayasetu.ui.viewmodel.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
-            DashboardScreen(
-                onLogout = {
-                    viewModel.logout()
-                    navController.navigate("login") {
-                        popUpTo(0)
-                    }
-                },
-                onNavigateToChat = {
-                    navController.navigate("chat")
-                },
-                onNavigateToFir = {
-                    navController.navigate("fir_form")
-                },
-                onNavigateToAnalysis = {
-                    navController.navigate("analysis")
-                },
-                onNavigateToUpload = {
-                    navController.navigate("fir_upload")
-                },
-                onNavigateToVoice = {
-                    navController.navigate("fir_voice")
-                },
-                onNavigateToEvidence = {
-                    navController.navigate("evidence_analysis")
-                },
-                onNavigateToLawyers = {
-                    navController.navigate("lawyers")
-                },
-                onNavigateToFeed = {
-                    navController.navigate("feed")
-                },
-                onNavigateToConversations = {
-                    navController.navigate("conversations")
+                composable("login") {
+                    LoginScreen(
+                        onNavigateToRegister = { navController.navigate("register") },
+                        onNavigateToDashboard = {
+                            navController.navigate("fir_form") { popUpTo("login") { inclusive = true } }
+                        }
+                    )
                 }
-            )
-        }
-        composable("chat") {
-            com.nyayasetu.ui.screens.ChatScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
+                composable("register") {
+                    RegisterScreen(
+                        onNavigateToLogin = { navController.navigateUp() }
+                    )
                 }
-            )
-        }
-        composable("fir_form") {
-            com.nyayasetu.ui.screens.FirFormScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
+                composable("dashboard") {
+                    val viewModel: com.nyayasetu.ui.viewmodel.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                    DashboardScreen(
+                        onLogout = {
+                            viewModel.logout()
+                            navController.navigate("login") { popUpTo(0) }
+                        },
+                        onNavigateToChat = { navController.navigate("chat") },
+                        onNavigateToFir = { navController.navigate("fir_form") },
+                        onNavigateToAnalysis = { navController.navigate("analysis") },
+                        onNavigateToUpload = { navController.navigate("fir_upload") },
+                        onNavigateToVoice = { navController.navigate("fir_voice") },
+                        onNavigateToEvidence = { navController.navigate("evidence_analysis") },
+                        onNavigateToLawyers = { navController.navigate("lawyers") },
+                        onNavigateToFeed = { navController.navigate("feed") },
+                        onNavigateToConversations = { navController.navigate("conversations") }
+                    )
                 }
-            )
-        }
-        composable("analysis") {
-            com.nyayasetu.ui.screens.AnalysisScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
+                composable("chat") {
+                    ChatScreen(onNavigateBack = { navController.navigateUp() })
                 }
-            )
-        }
-        composable("fir_upload") {
-            com.nyayasetu.ui.screens.FirUploadScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
+                composable("fir_form") {
+                    FirFormScreen(onNavigateBack = { navController.navigateUp() })
                 }
-            )
-        }
-        composable("fir_voice") {
-            com.nyayasetu.ui.screens.FirVoiceScreen(
-                onNavigateBack = {
-                    navController.navigateUp()
+                composable("analysis") {
+                    AnalysisScreen(onNavigateBack = { navController.navigateUp() })
                 }
-            )
-        }
-        composable("evidence_analysis") {
-            com.nyayasetu.ui.screens.EvidenceAnalysisScreen(
-                onNavigateBack = { navController.navigateUp() }
-            )
-        }
-        composable("lawyers") {
-            com.nyayasetu.ui.screens.LawyerListScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToProfile = { handle -> navController.navigate("lawyer_profile/$handle") }
-            )
-        }
-        composable(
-            "lawyer_profile/{handle}",
-            arguments = listOf(androidx.navigation.navArgument("handle") { type = androidx.navigation.NavType.StringType })
-        ) { backStackEntry ->
-            val handle = backStackEntry.arguments?.getString("handle") ?: return@composable
-            com.nyayasetu.ui.screens.LawyerProfileScreen(
-                handle = handle,
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
-            )
-        }
-        composable("feed") {
-            com.nyayasetu.ui.screens.FeedScreen(
-                onNavigateBack = { navController.navigateUp() }
-            )
-        }
-        composable("conversations") {
-            com.nyayasetu.ui.screens.ConversationsScreen(
-                onNavigateBack = { navController.navigateUp() },
-                onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
-            )
-        }
-        composable(
-            "chat_with_lawyer/{id}",
-            arguments = listOf(androidx.navigation.navArgument("id") { type = androidx.navigation.NavType.StringType })
-        ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getString("id") ?: return@composable
-            com.nyayasetu.ui.screens.ChatWithLawyerScreen(
-                conversationId = id,
-                onNavigateBack = { navController.navigateUp() }
-            )
+                composable("fir_upload") {
+                    FirUploadScreen(onNavigateBack = { navController.navigateUp() })
+                }
+                composable("fir_voice") {
+                    FirVoiceScreen(onNavigateBack = { navController.navigateUp() })
+                }
+                composable("evidence_analysis") {
+                    EvidenceAnalysisScreen(onNavigateBack = { navController.navigateUp() })
+                }
+                composable("lawyers") {
+                    LawyerListScreen(
+                        onNavigateBack = { navController.navigateUp() },
+                        onNavigateToProfile = { handle -> navController.navigate("lawyer_profile/$handle") }
+                    )
+                }
+                composable(
+                    "lawyer_profile/{handle}",
+                    arguments = listOf(androidx.navigation.navArgument("handle") { type = androidx.navigation.NavType.StringType })
+                ) { backStackEntry ->
+                    val handle = backStackEntry.arguments?.getString("handle") ?: return@composable
+                    LawyerProfileScreen(
+                        handle = handle,
+                        onNavigateBack = { navController.navigateUp() },
+                        onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
+                    )
+                }
+                composable("feed") {
+                    FeedScreen(onNavigateBack = { navController.navigateUp() })
+                }
+                composable("conversations") {
+                    ConversationsScreen(
+                        onNavigateBack = { navController.navigateUp() },
+                        onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
+                    )
+                }
+                composable(
+                    "chat_with_lawyer/{id}",
+                    arguments = listOf(androidx.navigation.navArgument("id") { type = androidx.navigation.NavType.StringType })
+                ) { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                    ChatWithLawyerScreen(
+                        conversationId = id,
+                        onNavigateBack = { navController.navigateUp() }
+                    )
+                }
+            }
         }
     }
 }

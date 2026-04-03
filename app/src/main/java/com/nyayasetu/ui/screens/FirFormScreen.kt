@@ -43,26 +43,13 @@ fun FirFormScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Filing an FIR") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
             Text("FIR Report Details", style = MaterialTheme.typography.titleLarge)
             
             formState.formError?.let {
@@ -187,7 +174,6 @@ fun FirFormScreen(
                 Button(onClick = { viewModel.resetSubmitState() }) { Text("Retry Submit") }
             }
         }
-    }
 
     if (showPreviewDialog) {
         AlertDialog(

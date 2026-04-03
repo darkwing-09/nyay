@@ -78,54 +78,8 @@ fun DashboardScreen(
     onNavigateToFeed: () -> Unit = {},
     onNavigateToConversations: () -> Unit = {}
 ) {
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp))
-                NavigationDrawerItem(label = { Text("File FIR") }, selected = false, onClick = onNavigateToFir)
-                NavigationDrawerItem(label = { Text("Logout") }, selected = false, onClick = onLogout)
-            }
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text(text = "Nyaya Setu") },
-                    navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Menu")
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = onLogout) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
-                                contentDescription = "Logout",
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                    ),
-                )
-            },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = onNavigateToChat,
-                    icon = { Icon(Icons.Outlined.Person, contentDescription = "Legal Assistant") },
-                    text = { Text("Ask Assistant") },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .padding(innerPadding)
                 .padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -271,6 +225,4 @@ fun DashboardScreen(
                 )
             }
         }
-    }
-    }
 }
