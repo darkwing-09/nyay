@@ -6,14 +6,13 @@ import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.nyayasetu.ui.screens.*
 import kotlinx.coroutines.launch
 
-@androidx.compose.material3.ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavGraph() {
     val navController = rememberNavController()
@@ -23,19 +22,23 @@ fun AppNavGraph() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val noDrawerRoutes = listOf("splash", "login", "register")
-    val showDrawer = currentRoute.isNotEmpty() && currentRoute !in noDrawerRoutes
+    val noDrawerRoutes = listOf("splash", "login", "register", "")
+    val showDrawer = currentRoute !in noDrawerRoutes
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = showDrawer,
         drawerContent = {
-            if (showDrawer) {
-                ModalDrawerSheet {
+            ModalDrawerSheet {
+                if (showDrawer) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Nyay Setu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
+                    Text(
+                        "Nyay Setu",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(16.dp)
+                    )
                     HorizontalDivider()
-                    
+
                     val menuItems = listOf(
                         "Home" to "dashboard",
                         "File FIR" to "fir_form",
@@ -68,7 +71,12 @@ fun AppNavGraph() {
                     NavigationDrawerItem(
                         label = { Text("Logout") },
                         selected = false,
-                        icon = { Icon(Icons.AutoMirrored.Outlined.ExitToApp, contentDescription = "Logout") },
+                        icon = {
+                            Icon(
+                                Icons.AutoMirrored.Outlined.ExitToApp,
+                                contentDescription = "Logout"
+                            )
+                        },
                         onClick = {
                             scope.launch { drawerState.close() }
                             navController.navigate("login") {
@@ -99,16 +107,22 @@ fun AppNavGraph() {
                 }
             }
         ) { innerPadding ->
-            val modifier = if (showDrawer) Modifier.padding(innerPadding) else Modifier
-            
-            NavHost(navController = navController, startDestination = "splash", modifier = modifier) {
+            NavHost(
+                navController = navController,
+                startDestination = "splash",
+                modifier = Modifier.padding(innerPadding)
+            ) {
                 composable("splash") {
                     SplashScreen(
                         onNavigateToLogin = {
-                            navController.navigate("login") { popUpTo("splash") { inclusive = true } }
+                            navController.navigate("login") {
+                                popUpTo("splash") { inclusive = true }
+                            }
                         },
                         onNavigateToDashboard = {
-                            navController.navigate("fir_form") { popUpTo("splash") { inclusive = true } }
+                            navController.navigate("fir_form") {
+                                popUpTo("splash") { inclusive = true }
+                            }
                         }
                     )
                 }
@@ -116,7 +130,9 @@ fun AppNavGraph() {
                     LoginScreen(
                         onNavigateToRegister = { navController.navigate("register") },
                         onNavigateToDashboard = {
-                            navController.navigate("fir_form") { popUpTo("login") { inclusive = true } }
+                            navController.navigate("fir_form") {
+                                popUpTo("login") { inclusive = true }
+                            }
                         }
                     )
                 }
@@ -126,7 +142,8 @@ fun AppNavGraph() {
                     )
                 }
                 composable("dashboard") {
-                    val viewModel: com.nyayasetu.ui.viewmodel.AuthViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+                    val viewModel: com.nyayasetu.ui.viewmodel.AuthViewModel =
+                        androidx.hilt.navigation.compose.hiltViewModel()
                     DashboardScreen(
                         onLogout = {
                             viewModel.logout()
@@ -164,18 +181,26 @@ fun AppNavGraph() {
                 composable("lawyers") {
                     LawyerListScreen(
                         onNavigateBack = { navController.navigateUp() },
-                        onNavigateToProfile = { handle -> navController.navigate("lawyer_profile/$handle") }
+                        onNavigateToProfile = { handle ->
+                            navController.navigate("lawyer_profile/$handle")
+                        }
                     )
                 }
                 composable(
                     "lawyer_profile/{handle}",
-                    arguments = listOf(androidx.navigation.navArgument("handle") { type = androidx.navigation.NavType.StringType })
+                    arguments = listOf(
+                        androidx.navigation.navArgument("handle") {
+                            type = androidx.navigation.NavType.StringType
+                        }
+                    )
                 ) { backStackEntry ->
                     val handle = backStackEntry.arguments?.getString("handle") ?: ""
                     LawyerProfileScreen(
                         handle = handle,
                         onNavigateBack = { navController.navigateUp() },
-                        onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
+                        onNavigateToChat = { convId ->
+                            navController.navigate("chat_with_lawyer/$convId")
+                        }
                     )
                 }
                 composable("feed") {
@@ -184,12 +209,18 @@ fun AppNavGraph() {
                 composable("conversations") {
                     ConversationsScreen(
                         onNavigateBack = { navController.navigateUp() },
-                        onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
+                        onNavigateToChat = { convId ->
+                            navController.navigate("chat_with_lawyer/$convId")
+                        }
                     )
                 }
                 composable(
                     "chat_with_lawyer/{id}",
-                    arguments = listOf(androidx.navigation.navArgument("id") { type = androidx.navigation.NavType.StringType })
+                    arguments = listOf(
+                        androidx.navigation.navArgument("id") {
+                            type = androidx.navigation.NavType.StringType
+                        }
+                    )
                 ) { backStackEntry ->
                     val id = backStackEntry.arguments?.getString("id") ?: ""
                     ChatWithLawyerScreen(
