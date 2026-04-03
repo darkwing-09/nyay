@@ -65,21 +65,21 @@ fun AppNavGraph() {
                 }
             )
         }
-        composable("analysis") {
+        composable("ai_analysis") {
             com.nyayasetu.ui.screens.AnalysisScreen(
                 onNavigateBack = {
                     navController.navigateUp()
                 }
             )
         }
-        composable("fir_upload") {
+        composable("upload_fir") {
             com.nyayasetu.ui.screens.FirUploadScreen(
                 onNavigateBack = {
                     navController.navigateUp()
                 }
             )
         }
-        composable("fir_voice") {
+        composable("voice_fir") {
             com.nyayasetu.ui.screens.FirVoiceScreen(
                 onNavigateBack = {
                     navController.navigateUp()
@@ -108,7 +108,7 @@ fun AppNavGraph() {
                 onNavigateToChat = { convId -> navController.navigate("chat_with_lawyer/$convId") }
             )
         }
-        composable("feed") {
+        composable("legal_feed") {
             com.nyayasetu.ui.screens.FeedScreen(
                 onNavigateBack = { navController.navigateUp() }
             )

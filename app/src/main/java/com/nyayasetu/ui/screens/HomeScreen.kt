@@ -3,7 +3,6 @@ package com.nyayasetu.ui.screens
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
@@ -46,6 +45,7 @@ private val featureList = listOf(
     FeatureItem("Messages", "Conversations", Icons.Filled.Forum, "conversations")
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavController) {
     Column(
@@ -90,22 +90,19 @@ fun HomeScreen(navController: NavController) {
                 )
 
                 Card(
+                    onClick = {
+                        println("Navigating to: ${item.route}")
+                        navController.navigate(item.route) {
+                            launchSingleTop = true
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(120.dp)
-                        .scale(scale)
-                        .clickable(
-                            interactionSource = interactionSource,
-                            indication = androidx.compose.material.ripple.rememberRipple()
-                        ) {
-                            try {
-                                navController.navigate(item.route) {
-                                    launchSingleTop = true
-                                }
-                            } catch (e: Exception) {}
-                        },
+                        .scale(scale),
                     shape = RoundedCornerShape(16.dp),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                    interactionSource = interactionSource
                 ) {
                     Box(
                         modifier = Modifier
