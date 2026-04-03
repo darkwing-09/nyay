@@ -6,10 +6,10 @@ import androidx.compose.material.icons.automirrored.outlined.ExitToApp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.nyayasetu.ui.screens.*
 import kotlinx.coroutines.launch
 
@@ -18,13 +18,13 @@ import kotlinx.coroutines.launch
 fun AppNavGraph() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     val noDrawerRoutes = listOf("splash", "login", "register")
-    val showDrawer = currentRoute != null && currentRoute !in noDrawerRoutes
+    val showDrawer = currentRoute.isNotEmpty() && currentRoute !in noDrawerRoutes
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -34,7 +34,7 @@ fun AppNavGraph() {
                 ModalDrawerSheet {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Nyay Setu", style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))
-                    Divider()
+                    HorizontalDivider()
                     
                     val menuItems = listOf(
                         "Home" to "dashboard",
@@ -55,9 +55,8 @@ fun AppNavGraph() {
                             onClick = {
                                 scope.launch { drawerState.close() }
                                 navController.navigate(route) {
-                                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                                     launchSingleTop = true
-                                    restoreState = true
+                                    popUpTo("fir_form") { saveState = true }
                                 }
                             },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
@@ -65,7 +64,7 @@ fun AppNavGraph() {
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
-                    Divider()
+                    HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text("Logout") },
                         selected = false,
@@ -73,7 +72,8 @@ fun AppNavGraph() {
                         onClick = {
                             scope.launch { drawerState.close() }
                             navController.navigate("login") {
-                                popUpTo(0)
+                                launchSingleTop = true
+                                popUpTo("fir_form") { inclusive = true }
                             }
                         },
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
@@ -171,7 +171,7 @@ fun AppNavGraph() {
                     "lawyer_profile/{handle}",
                     arguments = listOf(androidx.navigation.navArgument("handle") { type = androidx.navigation.NavType.StringType })
                 ) { backStackEntry ->
-                    val handle = backStackEntry.arguments?.getString("handle") ?: return@composable
+                    val handle = backStackEntry.arguments?.getString("handle") ?: ""
                     LawyerProfileScreen(
                         handle = handle,
                         onNavigateBack = { navController.navigateUp() },
@@ -191,7 +191,7 @@ fun AppNavGraph() {
                     "chat_with_lawyer/{id}",
                     arguments = listOf(androidx.navigation.navArgument("id") { type = androidx.navigation.NavType.StringType })
                 ) { backStackEntry ->
-                    val id = backStackEntry.arguments?.getString("id") ?: return@composable
+                    val id = backStackEntry.arguments?.getString("id") ?: ""
                     ChatWithLawyerScreen(
                         conversationId = id,
                         onNavigateBack = { navController.navigateUp() }
