@@ -23,7 +23,7 @@ fun AppNavGraph() {
                     }
                 },
                 onNavigateToDashboard = {
-                    navController.navigate("dashboard") {
+                    navController.navigate("fir_form") {
                         popUpTo("splash") { inclusive = true }
                     }
                 }
@@ -35,7 +35,7 @@ fun AppNavGraph() {
                     navController.navigate("register")
                 },
                 onNavigateToDashboard = {
-                    navController.navigate("dashboard") {
+                    navController.navigate("fir_form") {
                         popUpTo("login") { inclusive = true }
                     }
                 }

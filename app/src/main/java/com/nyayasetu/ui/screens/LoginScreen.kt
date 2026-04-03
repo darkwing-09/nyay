@@ -6,6 +6,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.nyayasetu.data.models.LoginRequest
@@ -62,6 +64,8 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        var passwordVisible by remember { mutableStateOf(false) }
+
         OutlinedTextField(
             value = password,
             onValueChange = { 
@@ -70,7 +74,13 @@ fun LoginScreen(
             },
             label = { Text("Password") },
             isError = passwordError,
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) androidx.compose.ui.text.input.VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val image = if (passwordVisible) androidx.compose.material.icons.Icons.Filled.Visibility else androidx.compose.material.icons.Icons.Filled.VisibilityOff
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(imageVector = image, contentDescription = if (passwordVisible) "Hide password" else "Show password")
+                }
+            },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -107,6 +117,15 @@ fun LoginScreen(
                 text = (uiState as Resource.Error).message,
                 color = MaterialTheme.colorScheme.error
             )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(
+            onClick = { /* Google Login Flow safely mocked */ },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+        ) {
+            Text("Login with Google")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
